@@ -15,3 +15,4 @@ export interface ApiHealthResponse {
   api: HealthStatus;
   database: DatabaseHealthStatus;
 }
+

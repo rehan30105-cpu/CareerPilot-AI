@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   FileText,
@@ -7,8 +7,10 @@ import {
   User,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuthStore } from "@/store/auth";
 
 interface ShellProps {
   children: React.ReactNode;
@@ -22,7 +24,14 @@ const navItems = [
 ];
 
 export function Shell({ children }: ShellProps) {
+  const { user, logout, isAuthenticated } = useAuthStore();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -73,13 +82,15 @@ export function Shell({ children }: ShellProps) {
         </nav>
 
         <div className="mt-auto p-4 border-t border-brand-100">
-          <NavLink
-            to="/settings"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-brand-600 hover:bg-brand-100 hover:text-brand-900 transition-colors"
-          >
-            <User className="w-5 h-5" />
-            Account
-          </NavLink>
+          <div className="p-2">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-800 transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              Sign out
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -99,9 +110,23 @@ export function Shell({ children }: ShellProps) {
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <button className="btn-ghost text-brand-600 hover:bg-brand-100">
-              <ShieldCheck />
-            </button>
+            {isAuthenticated && user ? (
+              <div className="hidden md:flex items-center gap-3 px-3 py-1 rounded-lg border border-brand-200 bg-white text-sm">
+                <span className="text-brand-600">
+                  {user.full_name || user.email}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="p-1.5 text-brand-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button className="btn-ghost text-brand-600 hover:bg-brand-100">
+                <User className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </header>
 
@@ -111,20 +136,3 @@ export function Shell({ children }: ShellProps) {
   );
 }
 
-function ShieldCheck() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-    </svg>
-  );
-}

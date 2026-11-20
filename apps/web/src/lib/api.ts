@@ -5,6 +5,7 @@
  * - base URL (from VITE_API_URL, proxied to /api in dev)
  * - error handling
  * - typed responses
+ * - automatic auth header injection
  */
 
 const BASE_URL = (import.meta as { env?: { VITE_API_URL?: string } }).env
@@ -12,9 +13,18 @@ const BASE_URL = (import.meta as { env?: { VITE_API_URL?: string } }).env
 
 class ApiClient {
   private baseUrl: string;
+  private token: string | null = null;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
+  }
+
+  setToken(token: string | null) {
+    this.token = token;
+  }
+
+  clearToken() {
+    this.token = null;
   }
 
   private async request<T>(
@@ -22,9 +32,17 @@ class ApiClient {
     options: RequestInit = {},
   ): Promise<T> {
     const url = `${this.baseUrl}${path}`;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+
     const response = await fetch(url, {
       headers: {
-        "Content-Type": "application/json",
+        ...headers,
         ...options.headers,
       },
       ...options,

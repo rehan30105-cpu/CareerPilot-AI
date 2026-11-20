@@ -60,7 +60,8 @@ Thumbs.db
 *.gguf
 *.bin
 
-# Misc
-*.log
-*.orig
-.terraform/
+# CareerPilot AI runtime uploads
+apps/api/uploads/
+
+# Test artifacts
+tests/test_resume.pdf
